@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>graph2</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+<style>
+    svg text {
+        user-select: none;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+    }
+      svg {
+        visibility: hidden;
+    }
+</style>
+
+<body>
+<script type="module">
+ import { trans_data } from '/static/js/process12.js'
+ import { calculateBias, transLinks, calX, calLableY, calLableX, parseTransform } from "/static/js/utils.js"
+            import { PartitionRelation, colorMap } from "/static/js/PartitionRelation.js"
+        let links, nodesName;
+
+        window.onload = function fetchData() {
+            fetch(`/data?id=${new URLSearchParams(window.location.search).get('data_id')}`)
+                .then(response => response.json())
+                .then(d => {
+                    let data = d.value;
+                    [nodesName, links] = trans_data(data)
+                    processData()
+                });
+
+        }
+
+        function processData() {
+            const svg = d3.select("svg");
+            svg.style("visibility", "visible");
+            const width = window.innerWidth * 0.96;
+            const height = window.innerHeight * 0.94;
+
+
+            svg.attr("width", width);
+            svg.attr("height", height);
+
+
+            const allData = []
+
+
+
+            const p = new PartitionRelation(nodesName, links)
+            const group = p.getComponentsName()
+            links = p.getFinalGroupRelations()
+            transLinks(links)
+            links.forEach((x, index) => x.id = index + 1)
+            const linksBias = calculateBias(links)
+            const markNodes = p.getMarkNodes()
+            const groupInnerLinks = p.getGroupInnerLinks()
+            console.log(links)
+            const link = svg.append("g")
+                .selectAll("line")
+                .data(links)
+                .enter().append("line")
+                .attr("stroke-width", 2)
+                .attr("stroke", d => d.color);
+
+            const lineHeight = 20;
+            let count = -1
+            svg.append("g")
+            const memoryG = []
+            for (let g in group) {
+
+
+                count += 1
+                let tt = group[g]
+                const nodes = [];
+                for (let t in tt) {
+                    nodes.push({ id: t + "_", name: tt[t] })
+                }
+                const totalG = svg.select("g")
+                const nowG = totalG.append("g")
+                memoryG.push(nowG)
+
+                const rect = nowG
+                    .append("rect")
+                    .attr("x", 0)
+                    .attr("y", 0)
+
+                    .style("stroke", "black") // 设置框的颜色
+                    .style("fill", "white") // 确保矩形是透明的，只有边框是可见的
+
+                    .attr("rx", 10) // 设置水平方向圆角半径为10
+                    .attr("ry", 10) // 设置垂直方向圆角半径为10
+                    ;
+
+                const node = nowG
+                    .selectAll("g")
+                    .data(nodes)
+                    .enter().append("g").attr("id", d => "node-" + d.id);;
+                let simulation = d3.forceSimulation(nodes)
+                let linkT = null;
+                let nowLinkData = null;
+                let totalUp = null
+                if (g in groupInnerLinks) {
+                    nowLinkData = groupInnerLinks[g].map(x => { x.target = x.target + "_"; x.source = x.source + "_"; return x })
+                    totalUp = new Set()
+                    nowLinkData.forEach(x => { totalUp.add('node-' + x.target); totalUp.add('node-' + x.source) })
+
+                    linkT = nowG.append('g')
+                        .selectAll("line")
+                        .data(nowLinkData)
+                        .attr("x", 100)
+                        .attr("y", 100)
+                        .enter().append("line")
+                        .attr("stroke-width", 2)
+                        .attr("stroke", d => d.color);
+
+                }
+
+                if (linkT) {
+                    simulation = simulation.force("link", d3.forceLink(nowLinkData).id(d => d.id))
+
+                }
+
+                node.each(function (d) {
+                    let rectWidth = 100;
+                    const nodeSelection = d3.select(this);
+                    const words = d.name.split(/\s+/);
+
+                    let lines = [];
+                    let currentLine = words[0];
+
+                    const tempText = svg.append("text").style("font-size", "12px").attr("opacity", 0); // 临时用于测量文本长度的text元素
+                    let temp = tempText.text(currentLine)
+                    if (temp.node().getComputedTextLength() > rectWidth) {
+                        rectWidth = temp.node().getComputedTextLength()
+                    }
+                    words.slice(1).forEach(word => {
+                        const testLine = currentLine + ' ' + word;
+                        tempText.text(testLine);
+                        const testWidth = tempText.node().getComputedTextLength();
+                        if (testWidth > rectWidth) {
+                            lines.push(currentLine);
+                            currentLine = word;
+                        } else {
+                            currentLine = testLine;
+                        }
+
+                    });
+                    lines.push(currentLine); // 添加最后一行
+
+                    // 动态计算矩形的宽度和高度
+                    const maxWidth = lines.reduce((max, line) => {
+                        tempText.text(line);
+                        return Math.max(max, tempText.node().getComputedTextLength());
+                    }, 0) + 3; // 在这里，我们只是直接在最长行的长度上加上了10px的边距
+                    rectWidth = maxWidth
+                    const rectHeight = lines.length * lineHeight + 3;
+                    tempText.remove(); // 移除临时text元素
+                    // 更新节点数据以保存其尺寸，用于后续位置调整
+                    d.width = rectWidth;
+                    d.height = rectHeight;
+
+                    nodeSelection.append("rect")
+                        .attr("width", rectWidth)
+                        .attr("height", rectHeight)
+                        .attr("fill", "white") // 设置填充颜色为白色
+                        .attr("stroke", "black") // 设置边框颜色为黑色
+                        .attr("stroke-width", markNodes.has(d.id.split("_")[0]) ? 1 : 0)
+                        .attr("rx", 10) // 设置水平方向圆角半径为10
+                        .attr("ry", 10).raise() // 设置垂直方向圆角半径为10
+
+                    // .attr("stroke-dasharray", "5,5"); // 设置虚线模式，5个单位的线段后跟5个单位的间隙
+
+                    const text = nodeSelection.append("text")
+                        .attr("x", rectWidth / 2)
+                        .attr("y", lineHeight / 2 + 3) // 考虑边距
+                        .attr("dominant-baseline", "middle")
+                        .attr("text-anchor", "middle")
+                        .style("cursor", linkT != null ? "pointer" : null)
+                        .style("font-size", "12px");
+                    lines.forEach((line, i) => {
+                        text.append("tspan")
+                            .attr("x", rectWidth / 2)
+                            .attr("dy", `${i == 0 ? 0 : lineHeight}px`)
+                            .text(line);
+                    });
+                }
+                );
+
+                const fixD = (node) => {
+                    let count = 0;
+                    node.each((d) => { count++ })
+                    const len = count
+                    const mod = Math.ceil(Math.sqrt(len))
+                    const allColumn = mod;
+                    const allRow = parseInt(len / allColumn)
+                    let times = linkT == null ? 1 : 3
+                    const bias = 6 * times
+                    const heightBias = 6 * times
+                    const widthBias = 6 * times
+                    const getMaxHeight = (list) => {
+                        let maxH = 0;
+                        list.forEach(d => {
+                            maxH = Math.max(maxH, d.height)
+                        })
+                        return maxH
+                    }
+
+                    const map = {}
+                    node.each((d, index) => {
+                        const row = parseInt(index / allColumn);
+                        const column = index % allColumn
+                        if (!map[row]) {
+                            map[row] = []
+                        }
+                        map[row].push(d)
+                    })
+                    let accH = bias
+                    let retW = 0
+                    const tempMap = {}
+                    for (let key in map) {
+                        const tempL = map[key]
+                        let accW = bias
+                        const maxH = getMaxHeight(tempL)
+                        for (let i = 0; i < tempL.length; i++) {
+                            const now = tempL[i]
+                            now.x = accW
+                            now.y = accH + (maxH - now.height) / 2
+                            accW += now.width + widthBias
+                        }
+                        tempMap[key] = accW
+                        retW = Math.max(accW, retW)
+
+                        accH += maxH + heightBias
+                    }
+
+                    for (let key in map) {
+                        const tempL = map[key]
+                        for (let i = 0; i < tempL.length; i++) {
+                            const now = tempL[i]
+                            now.x += (retW - tempMap[key]) / 2
+                        }
+                    }
+                    return [retW, accH]
+                };
+
+
+                let [bigWidth, bigHeight] = fixD(node)
+
+                rect
+                    .attr("width", bigWidth )
+                    .attr("height", bigHeight)
+
+                    ;
+                if (totalUp != null) {
+                    totalUp.forEach(x => d3.select("#" + x).raise())
+                }
+                const drag = d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended);
+
+                function dragstarted(event, d) {
+                    if (!event.active) simulation.alphaTarget(0.3).restart(); // 重启模拟并设置目标alpha值以增加模拟的热度
+                    d.fx = d.x; // 设置固定的x位置
+                    d.fy = d.y; // 设置固定的y位置
+                }
+
+                // 拖拽进行中的处理函数
+                function dragged(event, d) {
+                    d.fx = event.x; // 更新固定的x位置
+                    d.fy = event.y; // 更新固定的y位置
+                    fix_nodes(d)
+                    d3.select(this).raise()
+                }
+
+                function fix_nodes(this_node) {
+                    nodes.forEach((d) => {
+                        if (this_node != d) {
+                            d.fx = d.x
+                            d.fy = d.y
+                        }
+                    })
+                }
+
+                // 拖拽结束时的处理函数
+                function dragended(event, d) {
+                    if (!event.active) simulation.alphaTarget(0); // 当拖拽结束时，减少模拟的热度
+                }
+
+
+                node.attr("transform", d => {
+                    return `translate(${d.x}, ${d.y})`;
+                });
+                if (linkT != null) {
+                    node.call(drag)
+                }
+
+                simulation.on("tick", () => {
+                    node.attr("transform", d => {
+                        let newX = d.x;
+                        let newY = d.y;
+
+                        // 确保节点不会超出父级元素的边界
+                        // newX = limitWithinBoundary(newX, 0, parentWidth - d.width);
+                        // newY = limitWithinBoundary(newY, 0, parentHeight - d.height);
+                        return `translate(${newX}, ${newY})`;
+                    });
+                    if (linkT != null) {
+                        const bias = 6
+                        const [xBias, yBias] = parseTransform(nowG.attr('transform'))
+                        linkT.attr("x1", d => {
+                            let sourceNode = document.getElementById('node-' + d.source.id).getBoundingClientRect();  // 通过 ID 查找 DOM 元素
+                            let targetNode = document.getElementById('node-' + d.target.id).getBoundingClientRect();
+                            return sourceNode.x + d.source.width / 2 - bias - xBias
+                        }
+                            // d.source.x
+                        )
+                            .attr("y1", d => {
+                                let sourceNode = document.getElementById('node-' + d.source.id).getBoundingClientRect();  // 通过 ID 查找 DOM 元素
+                                let targetNode = document.getElementById('node-' + d.target.id).getBoundingClientRect();
+                                return sourceNode.y + d.source.height / 2 - bias - yBias
+                            }
+                                // d.source.y
+                            )
+                            .attr("x2", d => {
+                                let sourceNode = document.getElementById('node-' + d.source.id).getBoundingClientRect();
+                                let targetNode = document.getElementById('node-' + d.target.id).getBoundingClientRect();
+                                return targetNode.x + d.target.width / 2 - bias - xBias
+                            }
+
+                                // d.target.x
+                            )
+                            .attr("y2", d => {
+                                let sourceNode = document.getElementById('node-' + d.source.id).getBoundingClientRect();  // 通过 ID 查找 DOM 元素
+                                let targetNode = document.getElementById('node-' + d.target.id).getBoundingClientRect();
+                                return targetNode.y + d.target.height / 2 - bias - yBias
+                            }
+
+                                // d.target.y
+                            );
+                    }
+
+                })
+
+                allData.push({ x: 100, y: 100, width: bigWidth, height: bigHeight, id: g })
+            }
+
+            const setXy = (allData) => {
+                const len = allData.length
+                const ratio = 2
+                const radius = Math.min(width, height) / ratio; // 圆的半径
+                const center = { x: width / ratio - 100, y: height / ratio }; // 圆心位置
+                allData.forEach((d, index) => {
+                    const angle = (index / count) * 2 * Math.PI;
+                    d.x = center.x + radius * Math.cos(angle);
+                    d.y = center.y + radius * Math.sin(angle);
+                })
+            }
+            setXy(allData)
+
+            const gElements = []
+            allData.forEach((d, index) => {
+                const gElement = memoryG[index]
+                    .datum(d).call(d3.drag() // 应用拖拽行为
+                        .on("start", dragstarted)
+                        .on("drag", dragged)
+                        .on("end", dragended));
+                gElements.push(gElement)
+            })
+
+            const simulation = d3.forceSimulation(allData)
+                .force("link", d3.forceLink(links).id(d => d.id))
+                .force("charge", d3.forceManyBody())
+                .force("collide", d3.forceCollide(d => Math.sqrt(d.width * d.width + d.height * d.height) / 2 + 10))
+                .on("tick", ticked);
+
+
+
+
+            function limitWithinBoundary(value, min, max) {
+                return Math.max(min, Math.min(max, value));
+            }
+
+            // 定义每个模拟“tick”时的行为
+            let currentRadiusMultiplier = 0.1;
+            function ticked() {
+                gElements.forEach(gElement => {
+                    gElement
+                        .attr("transform", d => {
+                            let newX = d.x - d.width / 2;
+                            let newY = d.y
+                                - d.height / 2;
+                            // 确保节点不会超出父级元素的边界
+                            newX = limitWithinBoundary(newX, 0, width - d.width);
+                            newY = limitWithinBoundary(newY, 0, height - d.height);
+
+                            return `translate(${newX}, ${newY})`;
+                        });
+                })
+                link.attr("x1", d =>
+                    limitWithinBoundary(calX(linksBias, d), 0, width)
+                    // d.source.x
+                )
+                    .attr("y1", d =>
+                        limitWithinBoundary(d.source.y, 0, height)
+                        // d.source.y
+                    )
+                    .attr("x2", d =>
+                        limitWithinBoundary(d.target.x, 0, width)
+                        // d.target.x
+                    )
+                    .attr("y2", d =>
+                        limitWithinBoundary(d.target.y, 0, height)
+                        // d.target.y
+                    );
+                if (currentRadiusMultiplier < 1) {
+                    simulation.force("collide").radius(d => Math.max(d.width, d.height) / 1.8 * currentRadiusMultiplier);
+                    currentRadiusMultiplier += 0.01; // 每个tick增加的比例
+                }
+
+            }
+
+
+            // 拖拽开始时的处理函数
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart(); // 重启模拟并设置目标alpha值以增加模拟的热度
+                d.fx = d.x; // 设置固定的x位置
+                d.fy = d.y; // 设置固定的y位置
+            }
+
+            // 拖拽进行中的处理函数
+            function dragged(event, d) {
+                d3.select(this).raise()
+                d.fx = event.x; // 更新固定的x位置
+                d.fy = event.y; // 更新固定的y位置
+                fix_nodes(d)
+            }
+
+            function fix_nodes(this_node) {
+                allData.forEach((d) => {
+                    if (this_node != d) {
+                        d.fx = d.x
+                        d.fy = d.y
+                    }
+                })
+            }
+
+            // 拖拽结束时的处理函数
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0); // 当拖拽结束时，减少模拟的热度
+
+            }
+        }
+
+    </script>
+    <svg style="border: 1px solid black;"></svg>
+
+
+</body>
+
+</html>

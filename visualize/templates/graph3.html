@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>graph3</title>
+    <style>
+        svg text {
+            user-select: none;
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+body {
+  overflow: hidden;
+}
+
+
+    </style>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+
+<body >
+    <script type="module">
+        window.addEventListener('resize', function () {
+            location.reload();
+        });
+
+        import {attachColor, transGraph3} from "/static/js/utils.js"
+        window.onload = function fetchData() {
+
+            window.onload = fetch(`/data?id=${new URLSearchParams(window.location.search).get('data_id')}`)
+                .then(response => response.json())
+                .then(d => {
+                    d = d.value;
+                    let data = d.data
+                    let core = d.core
+                    let type = d.type
+                     let colorMap = {0: "green", 1: "red"}
+                    let emoMap = {"POS": 0, "NEG": 1}
+                    let reEmoMap = {0: "POS", 1: "NEG"}
+                    if (type) {
+                        data = transGraph3(data, core, type)
+                        processData(data, colorMap[emoMap[type]], emoMap[type], type)
+                    } else {
+                    for (let i in colorMap) {
+                        let temp = transGraph3(data, core, reEmoMap[i])
+                        processData(temp, colorMap[i], parseInt(i))
+                    }
+                    }
+
+                });
+
+        }
+
+        function processData(data, color, index, type) {
+
+        attachColor(data, color)
+            const width_times = 0.96;
+            const height_times = 0.96
+            const actualWidth = window.innerWidth
+            const actualHeight = window.innerHeight
+            let width, height;
+            width =  actualWidth * width_times;
+            height = actualHeight * height_times;
+            let offsetX = 0, offsetY = 0;
+            if (!type)
+            if (actualWidth > actualHeight) {
+                width /= 2
+                offsetX = width * index
+            } else {
+                height /= 2
+                offsetY = height * index
+            }
+
+        const svg = d3.select("body").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            // .style("border", "1px solid")
+
+            .style("background-color", "none")
+                .style("position", "absolute")
+                .style("left", `${offsetX}px`) // 使用计算的偏移量
+                .style("top", `${offsetY}px`)
+            ;
+        const pack = d3.pack()
+            .size([width, height])
+            .padding(10);
+
+        const root = d3.hierarchy(data)
+            .sum(d => {
+                const name = d.name || '';
+                const longestWordLength = Math.max(...name.split(' ').map(word => word.length));
+                return d.value + Math.max(10, longestWordLength) * 7;
+            })
+            .each(d => {
+                if (d.children) {
+                    d.size += d.children.length * 2;
+                    if (d.data.circle) {
+                        d.size += 5;
+                    }
+                }
+
+            })
+            .sort((a, b) => {
+                return (b.children ? 1 : 0) - (a.children ? 1 : 0) || (b.data.circle ? 1 : 0) - (a.data.circle ? 1 : 0) || b.size - a.size;
+            });
+
+        pack(root);
+        const bbox = svg.node().getBBox();
+        const node = svg.selectAll(".node")
+            .data(root.descendants())
+            .enter().append("g")
+            .attr("class", "node")
+            .attr("transform", d => `translate(${d.x},${d.y})`);
+
+        node.append("circle")
+            .attr("r", d => {
+                if (d.data.circle && !d.children) {
+                    return d.r;
+                }
+                return d.r;
+            })
+            .style("fill", d => d.children ? "none" : "none")
+            .style("stroke", d=>d.data.color)
+            .style("stroke-width", d => d.data.circle || d.children ? 2 : 0);
+
+        node.filter(d => !d.children).append("text")
+            .attr("dy", "0.3em")
+            .style("text-anchor", "middle")
+            .style("cursor", "pointer")
+
+            .each(function (d) {
+                const text = d3.select(this),
+                    words = d.data.name.split(/\s+/),
+                    maxLength = Math.max(10, ...words.map(d => d.length));
+
+                let line = [],
+                    lineNumber = 0,
+                    lineHeight = 1.7; // ems
+
+                words.forEach(function (word) {
+                    if (line.join(" ").length + word.length > maxLength) {
+                        text.append("tspan")
+                            .attr("x", 0)
+                            .attr("y", (lineNumber * lineHeight) + "em")
+                            .text(line.join(" "));
+                        line = [];
+                        lineNumber++;
+                    }
+                    line.push(word);
+                });
+
+                // Add the last line
+                text.append("tspan")
+                    .attr("x", 0)
+                    .attr("y", (lineNumber * lineHeight) + "em")
+                    .text(line.join(" "));
+                let nowTextHeight = text.node().getBoundingClientRect().height
+                text.style("transform", `translate(0, -${nowTextHeight / 2 * (lineNumber !== 0) - 5}px)`)
+            });
+        const drag = d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended);
+        const dragSvg = d3.drag()
+            .on("start", dragstarted)
+            .on("drag", draggedSvg)
+            .on("end", dragended);
+        if (!type)
+            svg.call(dragSvg)
+        function dragstarted(event) {
+            d3.select(this).raise().classed("active", true);
+        }
+
+        function draggedSvg(event, d) {
+             const translate = getTranslate(d3.select(this));
+            let newX = translate.x + event.dx;
+            let newY = translate.y + event.dy;
+            if (index == 0) {
+                if (actualHeight < actualWidth) {
+                    newX = limitWithinBoundary(newX, 0,  d3.select(this).attr("width"));
+                    newY = limitWithinBoundary(newY, -(height - width) / 2, (height - width) / 2)
+                } else {
+                    newY = limitWithinBoundary(newY, 0, d3.select(this).attr("height"))
+                    newX = limitWithinBoundary(newX, -(width - height ) / 2, (width - height ) / 2)
+                }
+            }
+            else {
+                if (actualHeight < actualWidth) {
+                    newX = limitWithinBoundary(newX, -d3.select(this).attr("width"), 0);
+                     newY = limitWithinBoundary(newY, -(height - width )/ 2, (height - width )/ 2)
+                }
+
+                else {
+                    newY = limitWithinBoundary(newY, -d3.select(this).attr("height"), 0)
+                    newX = limitWithinBoundary(newX, -(width - height) / 2, (width - height) / 2)
+                }
+
+            }
+            d3.select(this)
+                .attr("transform", `translate(${newX},${newY})`);
+
+        }
+
+        function dragged(event, d) {
+
+            const translate = getTranslate(d3.select(this));
+            let newX = translate.x + event.dx;
+            let newY = translate.y + event.dy;
+            d3.select(this)
+                .attr("transform", `translate(${newX},${newY})`);
+        }
+
+        function dragended(event) {
+            d3.select(this).classed("active", false);
+
+        }
+            function limitWithinBoundary(value, min, max) {
+                return Math.max(min, Math.min(max, value));
+            }
+
+        function getTranslate(selection) {
+            const transform = selection.attr("transform");
+            if (transform == null) return {x:0, y:0}
+            const translate = transform.substring(transform.indexOf("(") + 1, transform.indexOf(")")).split(",");
+            return {
+                x: +translate[0],
+                y: +translate[1] || 0
+            };
+        }
+        function zoomed(event, d) {
+            event.preventDefault();
+
+            const scaleFactor = event.deltaY < 0 ? 1.1 : 0.9;
+
+            const newRadius = d.r * scaleFactor;
+
+            d3.select(this).select("circle")
+                .attr("r", newRadius);
+
+            d.r = newRadius;
+        }
+
+
+
+        node.filter(d => d.data.circle)
+            .on("wheel", zoomed);
+
+
+        node.filter(d => !d.data.children)
+            .call(drag)
+        }
+
+
+
+    </script>
+</body>
+
+</html>
