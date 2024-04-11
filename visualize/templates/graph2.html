@@ -14,7 +14,9 @@
     }
       svg {
         visibility: hidden;
-    }
+    }body {
+  overflow: hidden;
+}
 </style>
 
 <body>
@@ -38,8 +40,8 @@
         function processData() {
             const svg = d3.select("svg");
             svg.style("visibility", "visible");
-            const width = window.innerWidth * 0.96;
-            const height = window.innerHeight * 0.94;
+            const width = window.innerWidth * 0.985;
+            const height = window.innerHeight * 0.98;
 
 
             svg.attr("width", width);
@@ -88,11 +90,11 @@
                     .attr("x", 0)
                     .attr("y", 0)
 
-                    .style("stroke", "black") // 设置框的颜色
-                    .style("fill", "white") // 确保矩形是透明的，只有边框是可见的
+                    .style("stroke", "black")
+                    .style("fill", "white")
 
-                    .attr("rx", 10) // 设置水平方向圆角半径为10
-                    .attr("ry", 10) // 设置垂直方向圆角半径为10
+                    .attr("rx", 10)
+                    .attr("ry", 10)
                     ;
 
                 const node = nowG
@@ -166,17 +168,17 @@
                     nodeSelection.append("rect")
                         .attr("width", rectWidth)
                         .attr("height", rectHeight)
-                        .attr("fill", "white") // 设置填充颜色为白色
-                        .attr("stroke", "black") // 设置边框颜色为黑色
+                        .attr("fill", "white")
+                        .attr("stroke", "black")
                         .attr("stroke-width", markNodes.has(d.id.split("_")[0]) ? 1 : 0)
-                        .attr("rx", 10) // 设置水平方向圆角半径为10
-                        .attr("ry", 10).raise() // 设置垂直方向圆角半径为10
+                        .attr("rx", 10)
+                        .attr("ry", 10).raise()
 
-                    // .attr("stroke-dasharray", "5,5"); // 设置虚线模式，5个单位的线段后跟5个单位的间隙
+
 
                     const text = nodeSelection.append("text")
                         .attr("x", rectWidth / 2)
-                        .attr("y", lineHeight / 2 + 3) // 考虑边距
+                        .attr("y", lineHeight / 2 + 3)
                         .attr("dominant-baseline", "middle")
                         .attr("text-anchor", "middle")
                         .style("cursor", linkT != null ? "pointer" : null)
@@ -264,15 +266,14 @@
                     .on("end", dragended);
 
                 function dragstarted(event, d) {
-                    if (!event.active) simulation.alphaTarget(0.3).restart(); // 重启模拟并设置目标alpha值以增加模拟的热度
-                    d.fx = d.x; // 设置固定的x位置
-                    d.fy = d.y; // 设置固定的y位置
+                    if (!event.active) simulation.alphaTarget(0.3).restart();
+                    d.fx = d.x;
+                    d.fy = d.y;
                 }
 
-                // 拖拽进行中的处理函数
                 function dragged(event, d) {
-                    d.fx = event.x; // 更新固定的x位置
-                    d.fy = event.y; // 更新固定的y位置
+                    d.fx = event.x;
+                    d.fy = event.y;
                     fix_nodes(d)
                     d3.select(this).raise()
                 }
@@ -286,9 +287,8 @@
                     })
                 }
 
-                // 拖拽结束时的处理函数
                 function dragended(event, d) {
-                    if (!event.active) simulation.alphaTarget(0); // 当拖拽结束时，减少模拟的热度
+                    if (!event.active) simulation.alphaTarget(0);
                 }
 
 
@@ -304,23 +304,21 @@
                         let newX = d.x;
                         let newY = d.y;
 
-                        // 确保节点不会超出父级元素的边界
-                        // newX = limitWithinBoundary(newX, 0, parentWidth - d.width);
-                        // newY = limitWithinBoundary(newY, 0, parentHeight - d.height);
+
                         return `translate(${newX}, ${newY})`;
                     });
                     if (linkT != null) {
                         const bias = 6
                         const [xBias, yBias] = parseTransform(nowG.attr('transform'))
                         linkT.attr("x1", d => {
-                            let sourceNode = document.getElementById('node-' + d.source.id).getBoundingClientRect();  // 通过 ID 查找 DOM 元素
+                            let sourceNode = document.getElementById('node-' + d.source.id).getBoundingClientRect();
                             let targetNode = document.getElementById('node-' + d.target.id).getBoundingClientRect();
                             return sourceNode.x + d.source.width / 2 - bias - xBias
                         }
                             // d.source.x
                         )
                             .attr("y1", d => {
-                                let sourceNode = document.getElementById('node-' + d.source.id).getBoundingClientRect();  // 通过 ID 查找 DOM 元素
+                                let sourceNode = document.getElementById('node-' + d.source.id).getBoundingClientRect();
                                 let targetNode = document.getElementById('node-' + d.target.id).getBoundingClientRect();
                                 return sourceNode.y + d.source.height / 2 - bias - yBias
                             }
@@ -335,7 +333,7 @@
                                 // d.target.x
                             )
                             .attr("y2", d => {
-                                let sourceNode = document.getElementById('node-' + d.source.id).getBoundingClientRect();  // 通过 ID 查找 DOM 元素
+                                let sourceNode = document.getElementById('node-' + d.source.id).getBoundingClientRect();
                                 let targetNode = document.getElementById('node-' + d.target.id).getBoundingClientRect();
                                 return targetNode.y + d.target.height / 2 - bias - yBias
                             }
@@ -352,8 +350,8 @@
             const setXy = (allData) => {
                 const len = allData.length
                 const ratio = 2
-                const radius = Math.min(width, height) / ratio; // 圆的半径
-                const center = { x: width / ratio - 100, y: height / ratio }; // 圆心位置
+                const radius = Math.min(width, height) / ratio;
+                const center = { x: width / ratio - 100, y: height / ratio };
                 allData.forEach((d, index) => {
                     const angle = (index / count) * 2 * Math.PI;
                     d.x = center.x + radius * Math.cos(angle);
@@ -365,7 +363,7 @@
             const gElements = []
             allData.forEach((d, index) => {
                 const gElement = memoryG[index]
-                    .datum(d).call(d3.drag() // 应用拖拽行为
+                    .datum(d).call(d3.drag()
                         .on("start", dragstarted)
                         .on("drag", dragged)
                         .on("end", dragended));
@@ -385,7 +383,6 @@
                 return Math.max(min, Math.min(max, value));
             }
 
-            // 定义每个模拟“tick”时的行为
             let currentRadiusMultiplier = 0.1;
             function ticked() {
                 gElements.forEach(gElement => {
@@ -394,7 +391,6 @@
                             let newX = d.x - d.width / 2;
                             let newY = d.y
                                 - d.height / 2;
-                            // 确保节点不会超出父级元素的边界
                             newX = limitWithinBoundary(newX, 0, width - d.width);
                             newY = limitWithinBoundary(newY, 0, height - d.height);
 
@@ -419,24 +415,22 @@
                     );
                 if (currentRadiusMultiplier < 1) {
                     simulation.force("collide").radius(d => Math.max(d.width, d.height) / 1.8 * currentRadiusMultiplier);
-                    currentRadiusMultiplier += 0.01; // 每个tick增加的比例
+                    currentRadiusMultiplier += 0.01;
                 }
 
             }
 
-
-            // 拖拽开始时的处理函数
             function dragstarted(event, d) {
-                if (!event.active) simulation.alphaTarget(0.3).restart(); // 重启模拟并设置目标alpha值以增加模拟的热度
-                d.fx = d.x; // 设置固定的x位置
-                d.fy = d.y; // 设置固定的y位置
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
             }
 
             // 拖拽进行中的处理函数
             function dragged(event, d) {
                 d3.select(this).raise()
-                d.fx = event.x; // 更新固定的x位置
-                d.fy = event.y; // 更新固定的y位置
+                d.fx = event.x;
+                d.fy = event.y;
                 fix_nodes(d)
             }
 
@@ -449,9 +443,9 @@
                 })
             }
 
-            // 拖拽结束时的处理函数
+
             function dragended(event, d) {
-                if (!event.active) simulation.alphaTarget(0); // 当拖拽结束时，减少模拟的热度
+                if (!event.active) simulation.alphaTarget(0);
 
             }
         }

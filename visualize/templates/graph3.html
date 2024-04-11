@@ -55,8 +55,8 @@ body {
         function processData(data, color, index, type) {
 
         attachColor(data, color)
-            const width_times = 0.96;
-            const height_times = 0.96
+            const width_times = 1;
+            const height_times = 1
             const actualWidth = window.innerWidth
             const actualHeight = window.innerHeight
             let width, height;
@@ -79,7 +79,7 @@ body {
 
             .style("background-color", "none")
                 .style("position", "absolute")
-                .style("left", `${offsetX}px`) // 使用计算的偏移量
+                .style("left", `${offsetX}px`)
                 .style("top", `${offsetY}px`)
             ;
         const pack = d3.pack()

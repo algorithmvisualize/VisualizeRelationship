@@ -15,7 +15,9 @@
     }
     svg {
         visibility: hidden;
-    }
+    }body {
+  overflow: hidden;
+}
 
     .node g {
         cursor: pointer;
@@ -49,8 +51,8 @@
          function processData() {
             const svg = d3.select("svg");svg.style("visibility", "visible");
 
-        const width = window.innerWidth * 0.96;
-        const height = window.innerHeight * 0.94;
+        const width = window.innerWidth * 0.985;
+        const height = window.innerHeight * 0.98;
         svg.attr("width", width);
     svg.attr("height", height);
 
@@ -112,7 +114,7 @@
                     currentLine = testLine;
                 }
             });
-            lines.push(currentLine); // 添加最后一行
+            lines.push(currentLine);
 
 
 
@@ -215,7 +217,7 @@
 
             if (currentRadiusMultiplier < 1) {
                 simulation.force("collide").radius(d => Math.max(d.width, d.height) / 1.8 * currentRadiusMultiplier);
-                currentRadiusMultiplier += 0.1; // 每个tick增加的比例
+                currentRadiusMultiplier += 0.1;
             }
         });
 
