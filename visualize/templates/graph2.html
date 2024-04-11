@@ -47,10 +47,7 @@
             svg.attr("width", width);
             svg.attr("height", height);
 
-
             const allData = []
-
-
 
             const p = new PartitionRelation(nodesName, links)
             const group = p.getComponentsName()
@@ -73,8 +70,6 @@
             svg.append("g")
             const memoryG = []
             for (let g in group) {
-
-
                 count += 1
                 let tt = group[g]
                 const nodes = [];
@@ -134,7 +129,7 @@
                     let lines = [];
                     let currentLine = words[0];
 
-                    const tempText = svg.append("text").style("font-size", "12px").attr("opacity", 0); // 临时用于测量文本长度的text元素
+                    const tempText = svg.append("text").style("font-size", "12px").attr("opacity", 0);
                     let temp = tempText.text(currentLine)
                     if (temp.node().getComputedTextLength() > rectWidth) {
                         rectWidth = temp.node().getComputedTextLength()
@@ -151,17 +146,16 @@
                         }
 
                     });
-                    lines.push(currentLine); // 添加最后一行
+                    lines.push(currentLine);
 
-                    // 动态计算矩形的宽度和高度
+
                     const maxWidth = lines.reduce((max, line) => {
                         tempText.text(line);
                         return Math.max(max, tempText.node().getComputedTextLength());
-                    }, 0) + 3; // 在这里，我们只是直接在最长行的长度上加上了10px的边距
+                    }, 0) + 3;
                     rectWidth = maxWidth
                     const rectHeight = lines.length * lineHeight + 3;
-                    tempText.remove(); // 移除临时text元素
-                    // 更新节点数据以保存其尺寸，用于后续位置调整
+                    tempText.remove();
                     d.width = rectWidth;
                     d.height = rectHeight;
 

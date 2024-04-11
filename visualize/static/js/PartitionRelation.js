@@ -132,11 +132,10 @@ class PartitionRelation {
                 const rootSource = this.uf.find(link.source);
                 const rootTarget = this.uf.find(link.target);
 
-                if (rootSource !== rootTarget) { // 属于不同的联通分量
-                    const sortedRoots = [rootSource, rootTarget].sort(); // 保证唯一性
-                    const key = sortedRoots.join("-"); // 创建一个分量之间的唯一键
+                if (rootSource !== rootTarget) {
+                    const sortedRoots = [rootSource, rootTarget].sort();
+                    const key = sortedRoots.join("-");
 
-                    // 记录分量之间的连接，如果已存在则不重复添加
                     if (!this.connections[key]) {
                         this.connections[key] = {}
                     }
@@ -147,7 +146,7 @@ class PartitionRelation {
                             color: link.color
                         }
                     }
-                    
+
                 }
             }
         });

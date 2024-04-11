@@ -57,12 +57,10 @@ function lightenHexColor(hex, amount) {
     let g = parseInt(hex.substring(3, 5), 16);
     let b = parseInt(hex.substring(5, 7), 16);
 
-    // 确保增加的亮度不会超过255
     r = Math.min(255, r + Math.round(amount));
     g = Math.min(255, g + Math.round(amount));
     b = Math.min(255, b + Math.round(amount));
 
-    // 将更新后的 RGB 值转换回十六进制格式，并确保长度为2
     r = r.toString(16).padStart(2, '0');
     g = g.toString(16).padStart(2, '0');
     b = b.toString(16).padStart(2, '0');
