@@ -98,11 +98,9 @@
             let lines = [];
             let currentLine = words[0];
             const tempText = svg.append("text").style("font-size", "12px").attr("opacity", 0); // 临时用于测量文本长度的text元素
-            let temp = tempText.text(currentLine)
             let rectWidth = 100;
-            if (temp.node().getComputedTextLength() > rectWidth) {
-                rectWidth = temp.node().getComputedTextLength()
-            }
+            words.forEach(word => rectWidth = Math.max(rectWidth, tempText.text(word).node().getComputedTextLength()))
+
             words.slice(1).forEach(word => {
                 const testLine = currentLine + ' ' + word;
                 tempText.text(testLine);

@@ -19,7 +19,7 @@ def visualize(data, graph_type: int, graph_name: str=None, port=port):
     all_data = {
         'data': data,
         'graph_type': graph_type,
-        'graph_name': graph_name
+        'graph_name': f'graph{graph_type}_{graph_name}'
     }
 
     response = requests.post(url, json=all_data)
