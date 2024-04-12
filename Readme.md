@@ -58,9 +58,10 @@ Right-clicking the mouse, you will find three types of options: **Save**, **Refr
 
 ![image-20240412104050796](http://cdn.frankjoey.icu/imgimage-20240412104050796.png)
 
+
 "Save" option saves the currently generated image to the default location (takes a screenshot), `E:\code\python` is absolute parent directory for the project.
 
-![image-20240412154422590](C:\Users\joef\AppData\Roaming\Typora\typora-user-images\image-20240412154422590.png)
+![image-20240412154422590](http://cdn.frankjoey.icu/imgimage-20240412154422590.png)
 
 "Refresh" option is to regenerate the current page. Please note that this will disrupt all your position adjustments.
 
