@@ -56,12 +56,12 @@ For visualization, simply run any function of unit_test in `client.py`.
 
 Right-clicking the mouse, you will find three types of options: **Save**, **Refresh**, and **Browser**.
 
-![image-20240412104050796](http://cdn.frankjoey.icu/imgimage-20240412104050796.png)
+<p align="center"><img src="http://cdn.frankjoey.icu/imgimage-20240412104050796.png" alt="image-20240412104050796"></p>
 
 
 "Save" option saves the currently generated image to the default location (takes a screenshot), `E:\code\python` is absolute parent directory for the project.
 
-![image-20240412154422590](http://cdn.frankjoey.icu/imgimage-20240412154422590.png)
+<p align="center"><img src="http://cdn.frankjoey.icu/imgimage-20240412154422590.png" alt="image-20240412154422590"></p>
 
 "Refresh" option is to regenerate the current page. Please note that this will disrupt all your position adjustments.
 
@@ -73,19 +73,19 @@ Here is the visualization 1 for data in Appendix. As you can see, the program au
 
 In fact, our nodes and relationship content can be automatically dragged into position. You can adjust them to a visually pleasing layout.
 
-![image-20240412155528004](http://cdn.frankjoey.icu/imgimage-20240412155528004.png)
+<p align="center"><img src="http://cdn.frankjoey.icu/imgimage-20240412155528004.png" alt="image-20240412155528004"></p>
 
 #### Graph2
 
 Only internal nodes with `POS`, `NEG`, `NEU` relationships between entities within the cluster can be dragged, while the cluster as a whole can be dragged.
 
-![image-20240412155459553](http://cdn.frankjoey.icu/imgimage-20240412155459553.png)
+<p align="center"><img src="http://cdn.frankjoey.icu/imgimage-20240412155459553.png" alt="image-20240412155459553"></p>
 
 Graph3
 
 Internal nodes can all be dragged, and at the same time, scrolling the mouse wheel over the innermost circle can adjust its radius. NEG and POS can be dragged as a whole.
 
-![graph3](http://cdn.frankjoey.icu/imggraph3.png)
+<p align="center"><img src="http://cdn.frankjoey.icu/imggraph3.png" alt="graph3"></p>
 
 ### Appendix
 
@@ -240,4 +240,3 @@ Internal nodes can all be dragged, and at the same time, scrolling the mouse whe
     ]
 ]
 ```
-
