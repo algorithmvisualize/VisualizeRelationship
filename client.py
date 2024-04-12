@@ -20,19 +20,19 @@ def all_entity_from_data(data: list):
 class ClientTest(unittest.TestCase):
 
     def test_graph1(self):
-        visualize(data, 1)
+        visualize(data, 1, "Battle of Chaeronea (338 BC)")
 
     def test_graph2(self):
-        visualize(data, 2)
+        visualize(data, 2, "Battle of Chaeronea (338 BC)")
 
     def test_graph3(self):
-        visualize({"data": data, "core": "Philip II"}, 3, graph_name=f'graph3')
+        visualize({"data": data, "core": "Philip II"}, 3, graph_name=f'Philip II')
 
     def test_graph3_pos(self):
-        visualize({"data": data, "core": "Philip II", "type": 'POS'}, 3, graph_name=f'graph3_POS')
+        visualize({"data": data, "core": "Philip II", "type": 'POS'}, 3, graph_name=f'Philip II_POS')
 
     def test_graph3_neg(self):
-        visualize({"data": data, "core": "Philip II", "type": 'NEG'}, 3, graph_name=f'graph3_POS')
+        visualize({"data": data, "core": "Philip II", "type": 'NEG'}, 3, graph_name=f'Philip II_NEG')
 
     def test_graph1_multi(self):
         texts = load_data()
@@ -47,7 +47,7 @@ class ClientTest(unittest.TestCase):
     def test_graph3_multi(self):
         entities = all_entity_from_data(data)
         for entity in entities:
-            visualize({"data": data, "core": entity}, 3, graph_name=f'graph3 entity={entity}')
+            visualize({"data": data, "core": entity}, 3, graph_name=f'entity={entity}')
 
 
 if __name__ == "__main__":
