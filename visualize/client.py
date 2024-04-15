@@ -29,6 +29,7 @@ def visualize(data, graph_type: int, graph_name: str=None, port=port):
     else:
         print('wrong code: ', response.status_code)
 
+
 if __name__ == '__main__':
     visualize(data, 1, "graph1")
     visualize(data, 2, "graph2")

@@ -79,8 +79,7 @@
                 const totalG = svg.select("g")
                 const nowG = totalG.append("g")
                 memoryG.push(nowG)
-                const base_stroke = 1.35
-                const bold_stoke = 2.1
+
                 const rect = nowG
                     .append("rect")
                     .attr("x", 0)
@@ -88,7 +87,7 @@
 
                     .style("stroke", "black")
                     .style("fill", "white")
-                    .style("stroke-width", nodes.length === 1 ? `${base_stroke}`: `${bold_stoke}`)
+
                     .attr("rx", 10)
                     .attr("ry", 10)
                     ;
@@ -112,7 +111,7 @@
                         .attr("x", 100)
                         .attr("y", 100)
                         .enter().append("line")
-                        .attr("stroke-width", bold_stoke - 0.1)
+                        .attr("stroke-width", 2)
                         .attr("stroke", d => d.color);
 
                 }
@@ -121,7 +120,7 @@
                     simulation = simulation.force("link", d3.forceLink(nowLinkData).id(d => d.id))
 
                 }
-                let show_stroke_flag = nodes.length === 1 ? 0: 1.35
+
                 node.each(function (d) {
                     let rectWidth = 100;
                     const nodeSelection = d3.select(this);
@@ -165,8 +164,7 @@
                         .attr("height", rectHeight)
                         .attr("fill", "white")
                         .attr("stroke", "black")
-                        {#.attr("stroke-width", markNodes.has(d.id.split("_")[0]) ? 1 : 0)#}
-                        .attr("stroke-width", show_stroke_flag)
+                        .attr("stroke-width", markNodes.has(d.id.split("_")[0]) ? 1 : 0)
                         .attr("rx", 10)
                         .attr("ry", 10).raise()
 
