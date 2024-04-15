@@ -76,7 +76,7 @@ function generateGradientColors(colorName, levels) {
     }
 
     const gradientColors = [];
-    const amountToLighten = Math.round((255 / levels) / 1.5);  // 根据层级计算增亮的幅度，并四舍五入到最近的整数
+    const amountToLighten = Math.round((255 / levels) / 1.5);
 
     for (let i = 0; i < levels; i++) {
         const lighterColor = lightenHexColor(hexColor, amountToLighten * i);

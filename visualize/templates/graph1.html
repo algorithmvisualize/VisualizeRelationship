@@ -97,7 +97,7 @@
             const words = d.name.split(/\s+/);
             let lines = [];
             let currentLine = words[0];
-            const tempText = svg.append("text").style("font-size", "12px").attr("opacity", 0); // 临时用于测量文本长度的text元素
+            const tempText = svg.append("text").style("font-size", "12px").attr("opacity", 0);
             let rectWidth = 100;
             words.forEach(word => rectWidth = Math.max(rectWidth, tempText.text(word).node().getComputedTextLength()))
 
