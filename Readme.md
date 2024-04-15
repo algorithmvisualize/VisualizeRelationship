@@ -79,7 +79,7 @@ In fact, our nodes and relationship content can be automatically dragged into po
 
 Only internal nodes with `POS`, `NEG`, `NEU` relationships between entities within the cluster can be dragged, while the cluster as a whole can be dragged.
 
-<p align="center"><img src="http://cdn.frankjoey.icu/imgimage-20240412155459553.png" alt="image-20240412155459553"></p>
+<p align="center"><img src="http://cdn.frankjoey.icu/imgimage-20240415130748515.png" alt="image-20240412155459553"></p>
 
 Graph3
 
