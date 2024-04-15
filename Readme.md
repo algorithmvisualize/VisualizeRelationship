@@ -31,7 +31,7 @@ Firstly, this is a `client-server` architecture. Before starting any other progr
 python start_server.py
 ```
 
-In `client.py`, we prepared 8 cases to visualize our relation map, respectively, 
+In `test_client.py`, we prepared 8 cases to visualize our relation map, respectively, 
 
 ```
 test_graph1
@@ -46,9 +46,9 @@ test_graph3_multi
 
 As the name suggests, for each of the three graphs, we have prepared both single-data and multiple-data versions. Graph 3, due to its positive and negative sentiment, has three variations.
 
-For visualization, simply run any function of unit_test in `client.py`.
+For visualization, simply run any function of unit_test in `test_client.py`.
 
-> Note: The visualization part utilizes PyQt. Due to limitations with threads, we have opted for a multiprocessing approach to display the visualized images. Therefore, if you intend to run all test units directly from `client.py`, you need to consider the configuration of your local machine in advance.
+> Note: The visualization part utilizes PyQt. Due to limitations with threads, we have opted for a multiprocessing approach to display the visualized images. Therefore, if you intend to run all test units directly from `test_test_client.py`, you need to consider the configuration of your local machine in advance.
 
 ### Visualization example
 
