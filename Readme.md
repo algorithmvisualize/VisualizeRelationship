@@ -87,6 +87,8 @@ Internal nodes can all be dragged, and at the same time, scrolling the mouse whe
 
 <p align="center"><img src="http://cdn.frankjoey.icu/imggraph3.png" alt="graph3"></p>
 
+> Note: Using `ctrl` + mouse scroll allows you to zoom in and out on all elements.
+
 ### Appendix
 
 ```json
